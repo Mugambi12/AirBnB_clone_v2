@@ -122,7 +122,7 @@ class TestBaseModel(unittest.TestCase):
                           "name",
                           "my_number",
                           "__class__"]
-        self.assertCountEqual(d.keys(), expected_attrs)
+        self.assertCountEqual(d.tokens(), expected_attrs)
         self.assertEqual(d['__class__'], 'BaseModel')
         self.assertEqual(d['name'], "Holberton")
         self.assertEqual(d['my_number'], 89)

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Contains the FileStorage class
+Contains the FileStorage class for serializing and deserializing instances to/from a JSON file.
 """
 
 import json
@@ -12,9 +12,16 @@ from models.review import Review
 from models.state import State
 from models.user import User
 
-classes = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
-           "Place": Place, "Review": Review, "State": State, "User": User}
-
+# Dictionary to map class names to actual classes
+classes = {
+    "Amenity": Amenity,
+    "BaseModel": BaseModel,
+    "City": City,
+    "Place": Place,
+    "Review": Review,
+    "State": State,
+    "User": User
+}
 
 class FileStorage:
     """serializes instances to a JSON file & deserializes back to instances"""
@@ -27,24 +34,24 @@ class FileStorage:
     def all(self, cls=None):
         """returns the dictionary __objects"""
         if cls is not None:
-            new_dict = {}
-            for key, value in self.__objects.items():
+            new_dictionary = {}
+            for token, value in self.__objects.items():
                 if cls == value.__class__ or cls == value.__class__.__name__:
-                    new_dict[key] = value
-            return new_dict
+                    new_dictionary[token] = value
+            return new_dictionary
         return self.__objects
 
     def new(self, obj):
-        """sets in __objects the obj with key <obj class name>.id"""
+        """sets in __objects the obj with token <obj class name>.id"""
         if obj is not None:
-            key = obj.__class__.__name__ + "." + obj.id
-            self.__objects[key] = obj
+            token = obj.__class__.__name__ + "." + obj.id
+            self.__objects[token] = obj
 
     def save(self):
         """serializes __objects to the JSON file (path: __file_path)"""
         json_objects = {}
-        for key in self.__objects:
-            json_objects[key] = self.__objects[key].to_dict(save_check=True)
+        for token in self.__objects:
+            json_objects[token] = self.__objects[token].to_dict(save_check=True)
         with open(self.__file_path, 'w') as f:
             json.dump(json_objects, f)
 
@@ -52,19 +59,19 @@ class FileStorage:
         """deserializes the JSON file to __objects"""
         try:
             with open(self.__file_path, 'r') as f:
-                jo = json.load(f)
-            for key in jo:
-                self.__objects[key] = classes[jo[key]["__class__"]](**jo[key])
+                j_file = json.load(f)
+            for token in j_file:
+                self.__objects[token] = classes[j_file[token]["__class__"]](**j_file[token])
         except:
             pass
 
     def get(self, cls, id):
         """Retrieving object by class and/or id
         """
-        key = cls.__name__ + '.' + id
+        token = cls.__name__ + '.' + id
 
-        if key in self.__objects:
-            return self.__objects[key]
+        if token in self.__objects:
+            return self.__objects[token]
         else:
             return None
 
@@ -76,9 +83,9 @@ class FileStorage:
     def delete(self, obj=None):
         """delete obj from __objects if it’s inside"""
         if obj is not None:
-            key = obj.__class__.__name__ + '.' + obj.id
-            if key in self.__objects:
-                del self.__objects[key]
+            token = obj.__class__.__name__ + '.' + obj.id
+            if token in self.__objects:
+                del self.__objects[token]
 
     def close(self):
         """call reload() method for deserializing the JSON file to objects"""
