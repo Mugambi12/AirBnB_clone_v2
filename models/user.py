@@ -1,35 +1,28 @@
 #!/usr/bin/python3
-"""
-This is the User class.
-"""
 
-import models
+"""This is the user class"""
+from sqlalchemy.ext.declarative import declarative_base
 from models.base_model import BaseModel, Base
-from sqlalchemy import Column, String
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-import hashlib
+from models.place import Place
+from models.review import Review
+
 
 class User(BaseModel, Base):
+    """This is the class for user
+    Attributes:
+        email: email address
+        password: password for you login
+        first_name: first name
+        last_name: last name
     """
-    Representation of the User class.
-    """
-    if models.selected_storage == 'db':
-        __tablename__ = 'users'
-        email = Column(String(128), nullable=False)
-        passcode = Column(String(128), nullable=False)
-        first_name = Column(String(128), nullable=True)
-        last_name = Column(String(128), nullable=True)
-        places = relationship("Place", backref="user")
-        reviews = relationship("Review", backref="user")
-    else:
-        email = ""
-        passcode = ""
-        first_name = ""
-        last_name = ""
-
-    def __init__(self, *args, **kwargs):
-        """Initialization of User"""
-        super().__init__(*args, **kwargs)
-        if self.passcode:
-            hashed_passcode = hashlib.md5(self.passcode.encode("utf-8"))
-            self.passcode = hashed_passcode.hexdigest()
+    __tablename__ = "users"
+    email = Column(String(128), nullable=False)
+    password = Column(String(128), nullable=False)
+    first_name = Column(String(128))
+    last_name = Column(String(128))
+    places = relationship("Place", cascade='all, delete, delete-orphan',
+                          backref="user")
+    reviews = relationship("Review", cascade='all, delete, delete-orphan',
+                           backref="user")
