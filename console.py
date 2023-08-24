@@ -24,6 +24,7 @@ classes = {
     "User": User
 }
 
+
 def parse(argmt):
     curly_match = re.search(r"\{(.*?)\}", argmt)
     bracket_match = re.search(r"\[(.*?)\]", argmt)
@@ -40,6 +41,7 @@ def parse(argmt):
         result_list = [item.strip(",") for item in split_val]
         result_list.append(curly_match.group())
         return result_list
+
 
 class HBNBCommand(cmd.Cmd):
     """ HBNH console """
