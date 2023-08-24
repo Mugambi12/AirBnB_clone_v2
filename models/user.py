@@ -1,5 +1,6 @@
 #!/usr/bin/python3
-""" holds class User"""
+""" Module: user - holds class User """
+
 import models
 from models.base_model import BaseModel, Base
 from os import getenv
@@ -10,8 +11,11 @@ import hashlib
 
 
 class User(BaseModel, Base):
-    """Representation of a user """
-    if models.storage_t == 'db':
+    """
+    Representation of the User class.
+    """
+
+    if models.selected_storage == 'db':
         __tablename__ = 'users'
         email = Column(String(128), nullable=False)
         password = Column(String(128), nullable=False)
@@ -26,7 +30,9 @@ class User(BaseModel, Base):
         last_name = ""
 
     def __init__(self, *args, **kwargs):
-        """initializes user"""
+        """
+        Initializes an instance of the User class.
+        """
         super().__init__(*args, **kwargs)
         if self.password:
             hashed_password = hashlib.md5(self.password.encode("utf-8"))

@@ -1,5 +1,6 @@
 #!/usr/bin/python
-""" holds class Place"""
+""" Module: place - holds class Place """
+
 import models
 from models.base_model import BaseModel, Base
 from os import getenv
@@ -7,7 +8,7 @@ import sqlalchemy
 from sqlalchemy import Column, String, Integer, Float, ForeignKey, Table
 from sqlalchemy.orm import relationship
 
-if models.storage_t == 'db':
+if models.selected_storage == 'db':
     place_amenity = Table('place_amenity', Base.metadata,
                           Column('place_id', String(60),
                                  ForeignKey('places.id', onupdate='CASCADE',
@@ -20,8 +21,11 @@ if models.storage_t == 'db':
 
 
 class Place(BaseModel, Base):
-    """Representation of Place """
-    if models.storage_t == 'db':
+    """
+    Representation of the Place class.
+    """
+
+    if models.selected_storage == 'db':
         __tablename__ = 'places'
         city_id = Column(String(60), ForeignKey('cities.id'), nullable=False)
         user_id = Column(String(60), ForeignKey('users.id'), nullable=False)
@@ -51,13 +55,15 @@ class Place(BaseModel, Base):
         amenity_ids = []
 
     def __init__(self, *args, **kwargs):
-        """initializes Place"""
+        """
+        Initializes an instance of the Place class.
+        """
         super().__init__(*args, **kwargs)
 
-    if models.storage_t != 'db':
+    if models.selected_storage != 'db':
         @property
         def reviews(self):
-            """getter attribute returns the list of Review instances"""
+            """Getter attribute that returns the list of Review instances"""
             from models.review import Review
             review_list = []
             all_reviews = models.storage.all(Review)
@@ -68,7 +74,7 @@ class Place(BaseModel, Base):
 
         @property
         def amenities(self):
-            """getter attribute returns the list of Amenity instances"""
+            """Getter attribute that returns the list of Amenity instances"""
             from models.amenity import Amenity
             amenity_list = []
             all_amenities = models.storage.all(Amenity)

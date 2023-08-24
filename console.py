@@ -11,10 +11,18 @@ from models.place import Place
 from models.review import Review
 from models.state import State
 from models.user import User
-import shlex  # for splitting the line along spaces except in double quotes
+import shlex
 
-classes = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
-           "Place": Place, "Review": Review, "State": State, "User": User}
+# Dictionary to map class names to their corresponding classes
+classes = {
+    "Amenity": Amenity,
+    "BaseModel": BaseModel,
+    "City": City,
+    "Place": Place,
+    "Review": Review,
+    "State": State,
+    "User": User
+}
 
 
 class HBNBCommand(cmd.Cmd):
@@ -35,7 +43,7 @@ class HBNBCommand(cmd.Cmd):
 
     def _key_value_parser(self, args):
         """creates a dictionary from a list of strings"""
-        new_dict = {}
+        parsed_dict = {}
         for arg in args:
             if "=" in arg:
                 kvp = arg.split('=', 1)
@@ -51,8 +59,8 @@ class HBNBCommand(cmd.Cmd):
                             value = float(value)
                         except ValueError:
                             continue
-                new_dict[key] = value
-        return new_dict
+                parsed_dict[key] = value
+        return parsed_dict
 
     def do_create(self, arg):
         """Creates a new instance of a class"""
@@ -61,8 +69,8 @@ class HBNBCommand(cmd.Cmd):
             print("** class name missing **")
             return False
         if args[0] in classes:
-            new_dict = self._key_value_parser(args[1:])
-            instance = classes[args[0]](**new_dict)
+            parsed_dict = self._key_value_parser(args[1:])
+            instance = classes[args[0]](**parsed_dict)
         else:
             print("** class doesn't exist **")
             return False
