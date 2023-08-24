@@ -2,7 +2,6 @@
 """ console """
 
 import cmd
-from datetime import datetime
 import models
 from models.amenity import Amenity
 from models.base_model import BaseModel
@@ -12,6 +11,7 @@ from models.review import Review
 from models.state import State
 from models.user import User
 import shlex
+import re
 
 # Dictionary to map class names to their corresponding classes
 classes = {
@@ -24,6 +24,22 @@ classes = {
     "User": User
 }
 
+def parse(argmt):
+    curly_match = re.search(r"\{(.*?)\}", argmt)
+    bracket_match = re.search(r"\[(.*?)\]", argmt)
+    if curly_match is None:
+        if bracket_match is None:
+            return [item.strip(",") for item in argmt.split()]
+        else:
+            split_val = argmt[:bracket_match.span()[0]].split()
+            result_list = [item.strip(",") for item in split_val]
+            result_list.append(bracket_match.group())
+            return result_list
+    else:
+        split_val = argmt[:curly_match.span()[0]].split()
+        result_list = [item.strip(",") for item in split_val]
+        result_list.append(curly_match.group())
+        return result_list
 
 class HBNBCommand(cmd.Cmd):
     """ HBNH console """
@@ -40,6 +56,10 @@ class HBNBCommand(cmd.Cmd):
     def do_quit(self, arg):
         """Quit command to exit the program"""
         return True
+
+    def do_ls(self, arg):
+        """List all available classes"""
+        print(", ".join(classes.keys()))
 
     def _key_value_parser(self, args):
         """creates a dictionary from a list of strings"""
@@ -132,7 +152,7 @@ class HBNBCommand(cmd.Cmd):
 
     def do_update(self, arg):
         """Update an instance based on the class name, id, attribute & value"""
-        args = shlex.split(arg)
+        args = parse(arg)
         integers = ["number_rooms", "number_bathrooms", "max_guest",
                     "price_by_night"]
         floats = ["latitude", "longitude"]
@@ -142,31 +162,47 @@ class HBNBCommand(cmd.Cmd):
             if len(args) > 1:
                 k = args[0] + "." + args[1]
                 if k in models.storage.all():
-                    if len(args) > 2:
-                        if len(args) > 3:
-                            if args[0] == "Place":
-                                if args[2] in integers:
-                                    try:
-                                        args[3] = int(args[3])
-                                    except ValueError:
-                                        args[3] = 0
-                                elif args[2] in floats:
-                                    try:
-                                        args[3] = float(args[3])
-                                    except ValueError:
-                                        args[3] = 0.0
-                            setattr(models.storage.all()[k], args[2], args[3])
-                            models.storage.all()[k].save()
-                        else:
-                            print("** value missing **")
+                    if len(args) > 3:
+                        if args[0] == "Place":
+                            if args[2] in integers:
+                                try:
+                                    args[3] = int(args[3])
+                                except ValueError:
+                                    args[3] = 0
+                            elif args[2] in floats:
+                                try:
+                                    args[3] = float(args[3])
+                                except ValueError:
+                                    args[3] = 0.0
+                        setattr(models.storage.all()[k], args[2], args[3])
+                        models.storage.all()[k].save()
                     else:
-                        print("** attribute name missing **")
+                        print("** value missing **")
                 else:
                     print("** no instance found **")
             else:
                 print("** instance id missing **")
         else:
             print("** class doesn't exist **")
+
+    def do_count(self, arg):
+        """Usage: count <class>
+        Prints the number of instances of a given class.
+        """
+        args = arg.split()
+        if len(args) == 0:
+            print("** class name missing **")
+            return
+        if args[0] in classes:
+            instance_count = sum(1 for obj in models.storage.all().values()
+                                 if isinstance(obj, classes[args[0]]))
+            print(instance_count)
+        else:
+            print("** class doesn't exist **")
+
+    def do_exit(self, arg):
+        """Exit the program"""
+        return True
 
 
 if __name__ == '__main__':
