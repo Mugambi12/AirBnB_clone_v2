@@ -1,34 +1,22 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Set up server file system for deployment
 
-# Install Nginx if not already installed
-if ! [ -x "$(command -v nginx)" ]; then
-    sudo apt-get update
-    sudo apt-get -y install nginx
-fi
+# install nginx
+sudo apt-get -y update
+sudo apt-get -y install nginx
+sudo service nginx start
 
-# Create necessary folders if they don't exist
-sudo mkdir -p /data/web_static/{releases/test,shared}
-sudo chown -R ubuntu:ubuntu /data/
-
-# Create a fake HTML file
-echo "<html>
-  <head>
-  </head>
-  <body>
-    Holberton School
-  </body>
-</html>" | sudo tee /data/web_static/releases/test/index.html
-
-# Create or recreate the symbolic link
-sudo rm -rf /data/web_static/current
+# configure file system
+sudo mkdir -p /data/web_static/shared/
+sudo mkdir -p /data/web_static/releases/test/
+echo "Holberton School" | sudo tee /data/web_static/releases/test/index.html > /dev/null
 sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
 
-# Update Nginx configuration
-config_file="/etc/nginx/sites-available/default"
-sudo sed -i '/^\tlocation \/ {/a\
-\t\talias /data/web_static/current/;' "$config_file"
+# set permissions
+sudo chown -R ubuntu:ubuntu /data/
 
-# Restart Nginx
+# configure nginx
+sudo sed -i '44i \\n\tlocation /hbnb_static {\n\t\talias /data/web_static/current/;\n\t}' /etc/nginx/sites-available/default
+
+# restart web server
 sudo service nginx restart
-
-exit 0
