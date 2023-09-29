@@ -1,13 +1,29 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Sets up a web server for deployment of web_static.
 
-# Configures a web server for deployment of web_static.
+apt-get update
+apt-get install -y nginx
 
-# Nginx configuration file
-nginx_conf=$(cat <<'EOF'
+# Create necessary directories
+mkdir -p /data/web_static/releases/test/
+mkdir -p /data/web_static/shared/
+
+# Create a basic index.html file
+echo "Holberton School" > /data/web_static/releases/test/index.html
+
+# Create a symbolic link
+ln -sf /data/web_static/releases/test/ /data/web_static/current
+
+# Set ownership and group
+chown -R ubuntu /data/
+chgrp -R ubuntu /data/
+
+# Configure Nginx
+printf %s "
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
-    add_header X-Served-By ${hostname};
+    add_header X-Served-By $HOSTNAME;
     root   /var/www/html;
     index  index.html index.htm;
 
@@ -21,40 +37,13 @@ server {
     }
 
     error_page 404 /404.html;
+
     location /404 {
-        root /var/www/html;
-        internal;
+      root /var/www/html;
+      internal;
     }
 }
-EOF
-)
-
-# Install Nginx
-sudo apt-get install -y nginx
-
-# Create necessary directories
-sudo mkdir -p /data/web_static/releases/test
-sudo mkdir -p /data/web_static/shared
-
-# Create index.html for test
-echo "Holberton School Puppet" | sudo tee /data/web_static/releases/test/index.html
-
-# Create symbolic link
-sudo ln -sf /data/web_static/releases/test /data/web_static/current
-
-# Set ownership
-sudo chown -R ubuntu:ubuntu /data/
-
-# Create index.html for default site
-echo "Holberton School Nginx" | sudo tee /var/www/html/index.html
-
-# Create 404.html
-echo "Ceci n'est pas une page" | sudo tee /var/www/html/404.html
-
-# Nginx default configuration
-sudo bash -c "cat > /etc/nginx/sites-available/default <<EOL
-$nginx_conf
-EOL"
+" > /etc/nginx/sites-available/default
 
 # Restart Nginx
-sudo /etc/init.d/nginx restarts
+service nginx restart
