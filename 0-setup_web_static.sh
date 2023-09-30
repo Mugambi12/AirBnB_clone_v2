@@ -47,3 +47,6 @@ server {
 
 # Restart Nginx
 service nginx restart
+
+# Exit with success status
+exit 0
