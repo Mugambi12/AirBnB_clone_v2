@@ -1,24 +1,20 @@
-#!/usr/bin/python
-"""
-Module: city - contains the City class representing a city entity.
-"""
-
-import models
+#!/usr/bin/python3
+"""This is the city class"""
+from sqlalchemy.ext.declarative import declarative_base
 from models.base_model import BaseModel, Base
-from os import getenv
-import sqlalchemy
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, Integer, String
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from models.place import Place
 
 
 class City(BaseModel, Base):
+    """This is the class for City
+    Attributes:
+        state_id: The state id
+        name: input name
     """
-    Representation of the City class, which defines attributes and,
-    relationships for cities.
-    """
-
-    __tablename__ = 'cities'
+    __tablename__ = "cities"
     name = Column(String(128), nullable=False)
     state_id = Column(String(60), ForeignKey('states.id'), nullable=False)
     places = relationship("Place", cascade='all, delete, delete-orphan',
